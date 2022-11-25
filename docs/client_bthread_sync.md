@@ -22,7 +22,7 @@
 
    brpc会在每一次RPC过程开始阶段创建本次RPC唯一的一个Id对象，用来保护Controller对象，互斥试图 同时访问Controller对象的多个bthread。Id对象主要成员有：
 
-   - first_ver & locked_ver
+   - first_ver & locked_ver（注意这两个变量与butex的value对应）
    
      如果Id对象的butex锁变量的值（butex指针指向的Butex对象的value值）为first_ver，表示Controller对象此时没有bthread在访问。此时如果有一个bthread试图访问Controller对象，则它可以取得访问权，先将butex锁变量的值置为locked_ver后，再去访问Controller对象。
      
