@@ -315,7 +315,7 @@ bool Socket::IsWriteComplete(Socket::WriteRequest* old_head,
 
 2. T1时刻起（后续若无特别说明，假设暂时没有新的bthread再往_write_head链表中加入待写数据），bthread 1向fd写自身携带的WriteRequest 1中的数据（假设TCP长连接已建好，在ConnectIfNot内部不发起非阻塞的connect调用），执行一次写操作后，进入IsWriteComplete，判断是否写完（WriteRequest 1中的数据未写完，或者虽然WriteRequest 1的数据写完了但是还有其他bthread往链表中加入了待写数据，都算没写完。本示例中此时IsWriteComplete肯定是返回false的）。
 
-3. bthread 1所在的pthread执行进入IsWriteComplete（假设WriteRequest 1中的数据没有全部写完），在IsWriteComplete中判断出WriteRequest 1中仍然有未写数据，并且_write_head也并不指向WriteRequest 1而是指向了新来的WriteRequest 3，为保证将数据依先后顺序写入fd，将图1所示的单向链表做翻转（代码中的_write_head.compare_exchange_strong操作的是最新的_write_head，在这个原子操作后，仍然会有bthread将待写数据加入到_write_head，_write_head会变化。但上述的链表翻转之后，如果有新来的WriteRequest暂时也不管它，后续会处理。这里先假设没有bthread加入新的待写数据）。此时内存结构为：
+3. bthread 1所在的pthread执行进入IsWriteComplete（假设WriteRequest 1中的数据没有全部写完），在IsWriteComplete中判断出WriteRequest 1中仍然有未写数据，并且_write_head也并不指向WriteRequest 1而是指向了新来的WriteRequest 3，**为保证将数据依先后顺序写入fd，将图1所示的单向链表做翻转**（代码中的_write_head.compare_exchange_strong操作的是最新的_write_head，在这个原子操作后，仍然会有bthread将待写数据加入到_write_head，_write_head会变化。但上述的链表翻转之后，如果有新来的WriteRequest暂时也不管它，后续会处理。这里先假设没有bthread加入新的待写数据）。此时内存结构为：
 
    <img src="../images/io_write_linklist_2.png" width="70%" height="70%"/>
 
