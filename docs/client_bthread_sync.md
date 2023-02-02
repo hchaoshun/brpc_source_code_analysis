@@ -48,7 +48,7 @@
    
      指向一个Butex对象头节点的指针，该Butex对象用来互斥同时访问Controller对象的多个bthread，waiter队列存储被挂起的等待Controller对象访问权的bthread的tid等信息。
      
-   - join_butex
+   - join_butex(用于同步rpc的处理）
    
      指向另一个Butex对象头节点的指针，如果RPC过程是同步方式，该Butex对象用来同步发起RPC过程的bthread和成功将服务器的Response存入Controller对象的bthread：发起RPC过程的bthread（bthread 1）会执行第一次发送请求的动作，然后会将自己的bthread id等信息存储在join_butex锁的waiters队列中，yield让出cpu，等待某一个能够成功将服务器的Response存入Controller对象的bthread将其唤醒。不论是处理第一次请求的Response的bthread，还是处理某一次重试请求的Response的bthread，只要有一个bthread将Response成功存入Controller对象，就从join_butex锁的waiters队列中拿到bthread 1的bthread id，通知TaskControl将bthread 1的id压入某一个TaskGroup的任务队列，这就是唤醒了bthread 1，bthread 1被某一个pthread重新执行后会从Controller对象中得到Response，进行后续的Response处理工作。
    
