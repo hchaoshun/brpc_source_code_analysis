@@ -19,7 +19,7 @@
   * [从TCP连接读取数据的并发处理](docs/io_read.md)
 * 内存管理
   * [ResourcePool：多线程下高效的内存分配与回收](docs/resource_pool.md)
-  * I/O读写缓冲区(https://blog.csdn.net/KIDGIN7439/article/details/111560093)
+  * [I/O读写缓冲区](https://blog.csdn.net/KIDGIN7439/article/details/111560093)
 * brpc的实时监控
   * bvar库
   * 常用性能监控指标
